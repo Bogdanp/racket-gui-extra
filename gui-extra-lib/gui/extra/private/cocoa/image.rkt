@@ -1,10 +1,8 @@
 #lang racket/base
 
 (require racket/class
-         "common.rkt"
          "executor.rkt"
          "ffi.rkt"
-         "mixin.rkt"
          (prefix-in mred: "mred.rkt"))
 
 (provide
@@ -82,7 +80,7 @@
      (lambda ()
        (super-instantiate
         [(lambda ()
-           (make-object wx-text-field% this this
+           (make-object wx-image-view% this this
                         (mred:mred->wx-container parent)
                         image))
          (lambda ()
@@ -108,7 +106,7 @@
                                                        (make-NSPoint 0 0)
                                                        (make-NSSize w h)))))])))
 
-(define wx-text-field%
+(define wx-image-view%
   (class (mred:make-window-glue% (mred:make-control% ns-image-view% 2 2 #f #f))
     (init mred proxy parent init-value)
     (super-make-object mred proxy null parent init-value)))

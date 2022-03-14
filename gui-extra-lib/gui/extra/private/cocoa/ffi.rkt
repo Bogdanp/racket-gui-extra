@@ -6,6 +6,7 @@
          ffi/unsafe/nsstring
          ffi/unsafe/objc
          mred/private/lock
+         mred/private/wx/cocoa/types
          (only-in mred/private/wx/cocoa/utils
                   as-objc-allocation
                   as-objc-allocation-with-retain
@@ -17,7 +18,8 @@
                ffi/unsafe/nsalloc
                ffi/unsafe/nsstring
                ffi/unsafe/objc
-               mred/private/lock)
+               mred/private/lock
+               mred/private/wx/cocoa/types)
  as-objc-allocation
  as-objc-allocation-with-retain
  ->wxb ->wx

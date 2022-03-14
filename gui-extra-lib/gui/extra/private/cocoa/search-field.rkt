@@ -1,8 +1,6 @@
 #lang racket/base
 
 (require racket/class
-         (prefix-in gui: racket/gui)
-         racket/math
          "common.rkt"
          "ffi.rkt"
          "mixin.rkt"
@@ -61,9 +59,9 @@
       [cocoa (let ([cocoa (as-objc-allocation
                            (tell (tell RacketNSSearchField alloc) init))])
                (begin0 cocoa
-                 (tell cocoa setDelegate: cocoa)
-                 (tell cocoa setStringValue: #:type _NSString init-value)
-                 (tell cocoa sizeToFit)))])
+                 (tellv cocoa setDelegate: cocoa)
+                 (tellv cocoa setStringValue: #:type _NSString init-value)
+                 (tellv cocoa sizeToFit)))])
 
      (define/public (search-did-start)
        (callback this 'begin-search))

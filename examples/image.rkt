@@ -1,6 +1,6 @@
 #lang racket/gui
 
-(require racket/gui/extra/macos)
+(require racket/gui/extra)
 
 (define ipad
   (make-image-from-symbol

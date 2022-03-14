@@ -1,7 +1,6 @@
 #lang racket/base
 
 (require racket/class
-         "common.rkt"
          "ffi.rkt"
          "mixin.rkt"
          (prefix-in mred: "mred.rkt"))
