@@ -3,6 +3,7 @@
 (require racket/class
          "executor.rkt"
          "ffi.rkt"
+         "font.rkt"
          (prefix-in mred: "mred.rkt"))
 
 (provide
@@ -47,9 +48,7 @@
          (define cocoa-config
            (tell NSImageSymbolConfiguration
                  configurationWithPointSize: #:type _CGFloat (or point-size 12)
-                 weight: #:type _CGFloat (case weight
-                                           [(normal) 0]
-                                           [else 0])))
+                 weight: #:type _CGFloat (if weight (symbol->font-weight weight) 0)))
 
          (tell (tell cocoa imageWithSymbolConfiguration: cocoa-config) retain)])))
   (define the-image
