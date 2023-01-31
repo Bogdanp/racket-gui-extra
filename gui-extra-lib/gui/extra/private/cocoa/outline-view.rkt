@@ -1,6 +1,7 @@
 #lang racket/base
 
 (require racket/class
+         "common.rkt"
          "ffi.rkt"
          (prefix-in mred: "mred.rkt"))
 
@@ -8,7 +9,7 @@
  outline-view-datasource%
  outline-view%)
 
-(import-class NSCell NSNumber NSObject NSOutlineView NSScrollView NSTableColumn)
+(import-class NSNumber NSString NSObject NSOutlineView NSScrollView NSTableColumn)
 (import-protocol NSOutlineViewDataSource)
 
 (define-objc-class RacketNSOutlineView NSOutlineView
@@ -20,37 +21,32 @@
   [-a _id (outlineView: [_id _sender]
                         child: [_NSInteger index]
                         ofItem: [_id item])
-      (cond
-        [(->wx wxb) => (λ (wx)
-                         (define child-it
-                           (send wx get-item-child (and item (tell #:type _NSInteger item integerValue)) index))
-                         (tell NSNumber
-                               numberWithInteger:
-                               #:type _NSInteger child-it))]
-        [else #f])]
+      (with-unboxed-wx
+        (define child-it
+          (send wx get-item-child (and item (tell #:type _NSInteger item integerValue)) index))
+        (tell NSNumber
+              numberWithInteger:
+              #:type _NSInteger child-it))]
 
   [-a _BOOL (outlineView: [_id _sender]
                           isItemExpandable: [_id item])
-      (cond
-        [(->wx wxb) => (λ (wx)
-                         (printf "expandable?~n")
-                         (send wx is-item-expandable? (and item (tell #:type _NSInteger item integerValue))))]
-        [else #f])]
+      (with-unboxed-wx
+        (send wx is-item-expandable? (and item (tell #:type _NSInteger item integerValue))))]
 
   [-a _NSInteger (outlineView: [_id _sender]
                                numberOfChildrenOfItem: [_id item])
-      (cond
-        [(->wx wxb) => (λ (wx)
-                         (send wx get-item-child-count (and item (tell #:type _NSInteger item integerValue))))]
-        [else 0])]
+      (with-unboxed-wx
+        (send wx get-item-child-count (and item (tell #:type _NSInteger item integerValue))))]
 
   [-a _id (outlineView: [_id _sender]
                         objectValueForTableColumn: [_id column]
                         byItem: [_id item])
-      (cond
-        [(->wx wxb) => (λ (wx)
-                         (tell (tell (tell NSCell alloc) initTextCell: #:type _NSString "???") autorelease))]
-        [else #f])])
+      (with-unboxed-wx
+        (define child
+          (send wx get-item (and item (tell #:type _NSInteger item integerValue))))
+        (define text
+          (or child "???"))
+        (tell (tell (tell NSString alloc) initWithUTF8String: #:type _string text) autorelease))])
 
 (define outline-view-datasource-wrapper%
   (class object%
@@ -58,8 +54,7 @@
     (super-new)
 
     (define seq 0)
-    (define items (make-hasheqv))
-    (define item-ids (make-weak-hasheq))
+    (define item-ids (make-hasheqv))
 
     ;; TODO: need box here
     (define (next-id!)
@@ -67,9 +62,7 @@
         (set! seq (add1 seq))))
 
     (define (lookup-item it)
-      (define maybe-item-id (hash-ref item-ids it #f))
-      (define maybe-item-box (and maybe-item-id (hash-ref items maybe-item-id #f)))
-      (and maybe-item-box (weak-box-value maybe-item-box)))
+      (hash-ref item-ids it #f))
 
     (define (store-item! it)
       (cond
@@ -77,23 +70,17 @@
         [else
          (define id (next-id!))
          (begin0 id
-           (hash-set! item-ids it id)
-           (hash-set! items id (make-weak-box it)))]))
+           (hash-set! item-ids id it))]))
+
+    (define/public (get-item it)
+      (lookup-item it))
 
     (define/public (get-item-child it idx)
       (store-item!
-       (send ds get-item-child (and it (lookup-item it)) idx)))
+       (send ds get-item-child (lookup-item it) idx)))
 
     (define/public (get-item-child-count it)
-      (cond
-        [(not it)
-         (send ds get-item-child-count #f)]
-
-        [(lookup-item it)
-         => (λ (ds-it)
-              (send ds get-item-child-count ds-it))]
-
-        [else 0]))
+      (send ds get-item-child-count (lookup-item it)))
 
     (define/public (is-item-expandable? it)
       (send ds is-item-expandable? (lookup-item it)))))
@@ -115,22 +102,26 @@
   (class mred:basic-control%
     (init parent
           [datasource (new outline-view-datasource%)]
-          [callback void])
+          [callback void]
+          [columns '("Column")])
     (init-rest)
-    (call-as-atomic
-     (lambda ()
-       (super-instantiate
-        [(lambda ()
-           (make-object wx-outline-view% this this
-                        (mred:mred->wx-container parent)
-                        datasource callback))
-         (lambda ()
-           (void))
-         #f parent datasource callback #f])))))
+
+    (define (make-wx)
+      (new wx-outline-view%
+           [mred this]
+           [proxy this]
+           [parent (mred:mred->wx-container parent)]
+           [datasource datasource]
+           [callback callback]
+           [columns columns]))
+
+    (with-atomic
+      (super-instantiate
+       (make-wx no-mismatches #f parent callback #f)))))
 
 (define ns-outline-view%
   (class mred:item%
-    (init parent datasource)
+    (init parent datasource columns)
     (inherit-field callback)
     (inherit set-size)
 
@@ -150,7 +141,7 @@
     (set-ivar! content-cocoa wxb (->wxb this))
     (tellv content-cocoa setDelegate: content-cocoa)
     (tellv content-cocoa setDataSource: ds)
-    (for ([title '("Untitled")])
+    (for ([title (in-list columns)])
       (define col
         (as-objc-allocation
          (tell (tell NSTableColumn alloc) initWithIdentifier: #:type _NSString title)))
@@ -171,6 +162,6 @@
     (set-size 0 0 32 50)))
 
 (define wx-outline-view%
-  (class (mred:make-window-glue% (mred:make-control% ns-outline-view% 2 2 #t #f))
-    (init mred proxy parent datasource callback)
-    (super-make-object mred proxy null parent datasource callback)))
+  (class (mred:make-window-glue% (mred:make-control% ns-outline-view% 0 0 #t #t))
+    (init mred proxy parent datasource callback columns)
+    (super-make-object mred proxy null parent datasource columns callback)))

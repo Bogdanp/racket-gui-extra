@@ -1,15 +1,17 @@
 #lang racket/base
 
-(require (only-in mred/private/wx/common/queue queue-event)
+(require (for-syntax racket/base
+                     racket/syntax
+                     syntax/parse)
+         (only-in mred/private/wx/common/queue queue-event)
          racket/class
          "ffi.rkt")
 
 (provide
  with-atomic
- with-entry-point
- try-send*
- try-send
- no-mismatches)
+ with-entry-point)
+
+;; ffi ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-syntax-rule (with-atomic body0 body ...)
   (call-as-atomic
@@ -20,6 +22,25 @@
   (entry-point
    (lambda ()
      body0 body ...)))
+
+
+;; wx ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(provide
+ with-unboxed-wx
+ try-send*
+ try-send
+ no-mismatches)
+
+(define-syntax (with-unboxed-wx stx)
+  (syntax-parse stx
+    [(_ #:wxb-id wxb-id #:wx-id wx-id body ...+)
+     #'(let ([wx-id (->wx wxb-id)])
+         (and wx-id (let () body ...)))]
+    [(_ body ...+)
+     #:with wxb-id (format-id stx "wxb")
+     #:with wx-id (format-id stx "wx")
+     #'(with-unboxed-wx #:wxb-id wxb-id #:wx-id wx-id body ...)]))
 
 (define-syntax-rule (try-send* who [what e ...] ...)
   (let ([wx (->wx who)])
