@@ -8,7 +8,8 @@
  with-atomic
  with-entry-point
  try-send*
- try-send)
+ try-send
+ no-mismatches)
 
 (define-syntax-rule (with-atomic body0 body ...)
   (call-as-atomic
@@ -30,3 +31,6 @@
 
 (define-syntax-rule (try-send who what e ...)
   (try-send* who [what e ...]))
+
+(define (no-mismatches)
+  null)

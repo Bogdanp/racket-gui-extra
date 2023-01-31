@@ -26,20 +26,17 @@
           [callback void])
     (init-rest)
 
+    (define (make-wx)
+      (new wx-search-field%
+           [mred this]
+           [proxy this]
+           [parent (mred:mred->wx-container parent)]
+           [init-value init-value]
+           [callback callback]))
+
     (with-atomic
-      (super-new
-       [mk-wx (λ ()
-                (new wx-search-field%
-                     [mred this]
-                     [proxy this]
-                     [parent (mred:mred->wx-container parent)]
-                     [init-value init-value]
-                     [callback callback]))]
-       [mismatches (λ () null)]
-       [parent parent]
-       [cursor #f]
-       [lbl #f]
-       [cb callback]))
+      (super-instantiate
+       (make-wx no-mismatches #f parent callback #f)))
 
     (define/public (get-value)
       (with-entry-point

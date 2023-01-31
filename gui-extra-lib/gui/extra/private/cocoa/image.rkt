@@ -76,19 +76,17 @@
   (class mred:basic-control%
     (init parent image)
     (init-rest)
+
+    (define (make-wx)
+      (new wx-image-view%
+           [mred this]
+           [proxy this]
+           [parent (mred:mred->wx-container parent)]
+           [image image]))
+
     (with-atomic
-      (super-new
-       [mk-wx (λ ()
-                (new wx-image-view%
-                     [mred this]
-                     [proxy this]
-                     [parent (mred:mred->wx-container parent)]
-                     [image image]))]
-       [mismatches (λ () null)]
-       [parent parent]
-       [cursor #f]
-       [lbl #f]
-       [cb void]))))
+      (super-instantiate
+       (make-wx no-mismatches #f parent void #f)))))
 
 (define ns-image-view%
   (class mred:item%
