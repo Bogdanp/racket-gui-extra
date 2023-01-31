@@ -2,7 +2,6 @@
 
 (require racket/class
          "common.rkt"
-         "executor.rkt"
          "ffi.rkt"
          "font.rkt"
          (prefix-in mred: "mred.rkt"))
@@ -37,27 +36,19 @@
   (define name-str
     (symbol->string name))
   (define cocoa
-    (let ([cocoa (tell NSImage
-                       imageWithSystemSymbolName: #:type _NSString name-str
-                       accessibilityDescription: #:type _NSString (or description name-str))])
-      (cond
-        [(and (not point-size)
-              (not weight))
-         (tell cocoa retain)]
-
-        [else
-         (define cocoa-config
-           (tell NSImageSymbolConfiguration
-                 configurationWithPointSize: #:type _CGFloat (or point-size 12)
-                 weight: #:type _CGFloat (if weight (symbol->font-weight weight) 0)))
-
-         (tell (tell cocoa imageWithSymbolConfiguration: cocoa-config) retain)])))
-  (define the-image
-    (new image%
-         [cocoa cocoa]))
-  (begin0 the-image
-    (will-register executor the-image (λ (_the-image)
-                                        (tell cocoa release)))))
+    (with-atomic
+      (let ([cocoa (as-objc-allocation-with-retain
+                    (tell NSImage
+                          imageWithSystemSymbolName: #:type _NSString name-str
+                          accessibilityDescription: #:type _NSString (or description name-str)))])
+        (when (or point-size weight)
+          (define cocoa-config
+            (tell NSImageSymbolConfiguration
+                  configurationWithPointSize: #:type _CGFloat (or point-size 12)
+                  weight: #:type _CGFloat (if weight (symbol->font-weight weight) 0)))
+          (as-objc-allocation-with-retain
+           (tell cocoa imageWithSymbolConfiguration: cocoa-config))))))
+  (new image% [cocoa cocoa]))
 
 
 ;; image-view% ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -108,6 +99,6 @@
                                                        (make-NSSize w h)))))])))
 
 (define wx-image-view%
-  (class (mred:make-window-glue% (mred:make-control% ns-image-view% 2 2 #f #f))
+  (class (mred:make-window-glue% (mred:make-control% ns-image-view% 0 0 #f #f))
     (init mred proxy parent image)
     (super-make-object mred proxy null parent image)))
