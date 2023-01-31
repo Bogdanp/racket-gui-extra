@@ -4,9 +4,14 @@
 
 (define ipad
   (make-image-from-symbol
-   #:point-size 32
+   #:point-size 64
+   #:weight 'ultra-light
    'ipad))
 
-(define f (new frame% [label "iPad"]))
-(new image-view% [parent f] [image ipad])
+(define f (new frame% [label "iPads"]))
+(define hp (new horizontal-panel% [parent f]))
+(new image-view% [parent hp] [image ipad])
+(new image-view% [parent hp] [image ipad])
+(new image-view% [parent hp] [image ipad])
+(new image-view% [parent hp] [image ipad])
 (send f show #t)

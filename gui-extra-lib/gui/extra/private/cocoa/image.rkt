@@ -1,6 +1,7 @@
 #lang racket/base
 
 (require racket/class
+         "common.rkt"
          "executor.rkt"
          "ffi.rkt"
          "font.rkt"
@@ -75,16 +76,19 @@
   (class mred:basic-control%
     (init parent image)
     (init-rest)
-    (call-as-atomic
-     (lambda ()
-       (super-instantiate
-        [(lambda ()
-           (make-object wx-image-view% this this
-                        (mred:mred->wx-container parent)
-                        image))
-         (lambda ()
-           (void))
-         #f parent void #f])))))
+    (with-atomic
+      (super-new
+       [mk-wx (λ ()
+                (new wx-image-view%
+                     [mred this]
+                     [proxy this]
+                     [parent (mred:mred->wx-container parent)]
+                     [image image]))]
+       [mismatches (λ () null)]
+       [parent parent]
+       [cursor #f]
+       [lbl #f]
+       [cb void]))))
 
 (define ns-image-view%
   (class mred:item%
@@ -107,5 +111,5 @@
 
 (define wx-image-view%
   (class (mred:make-window-glue% (mred:make-control% ns-image-view% 2 2 #f #f))
-    (init mred proxy parent init-value)
-    (super-make-object mred proxy null parent init-value)))
+    (init mred proxy parent image)
+    (super-make-object mred proxy null parent image)))
