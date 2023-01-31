@@ -2,6 +2,10 @@
 
 (require racket/gui/extra)
 
+;; NOTE: The outline view is not ready for use yet.  The code below
+;; mostly works, but the implementation is incomplete and partially
+;; wrong.
+
 (define tree
   (hash
    "/" '("a" "b")
