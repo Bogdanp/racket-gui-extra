@@ -21,32 +21,32 @@
   [-a _id (outlineView: [_id _sender]
                         child: [_NSInteger index]
                         ofItem: [_id item])
-      (with-unboxed-wx
-        (define child-it
-          (send wx get-item-child (and item (tell #:type _NSInteger item integerValue)) index))
-        (tell NSNumber
-              numberWithInteger:
-              #:type _NSInteger child-it))]
+    (with-unboxed-wx
+      (define child-it
+        (send wx get-item-child (and item (tell #:type _NSInteger item integerValue)) index))
+      (tell NSNumber
+            numberWithInteger:
+            #:type _NSInteger child-it))]
 
   [-a _BOOL (outlineView: [_id _sender]
                           isItemExpandable: [_id item])
-      (with-unboxed-wx
-        (send wx is-item-expandable? (and item (tell #:type _NSInteger item integerValue))))]
+    (with-unboxed-wx
+      (send wx is-item-expandable? (and item (tell #:type _NSInteger item integerValue))))]
 
   [-a _NSInteger (outlineView: [_id _sender]
                                numberOfChildrenOfItem: [_id item])
-      (with-unboxed-wx
-        (send wx get-item-child-count (and item (tell #:type _NSInteger item integerValue))))]
+    (with-unboxed-wx
+      (send wx get-item-child-count (and item (tell #:type _NSInteger item integerValue))))]
 
   [-a _id (outlineView: [_id _sender]
                         objectValueForTableColumn: [_id column]
                         byItem: [_id item])
-      (with-unboxed-wx
-        (define child
-          (send wx get-item (and item (tell #:type _NSInteger item integerValue))))
-        (define text
-          (or child "???"))
-        (tell (tell (tell NSString alloc) initWithUTF8String: #:type _string text) autorelease))])
+    (with-unboxed-wx
+      (define child
+        (send wx get-item (and item (tell #:type _NSInteger item integerValue))))
+      (define text
+        (or child "???"))
+      (tell (tell (tell NSString alloc) initWithUTF8String: #:type _string text) autorelease))])
 
 (define outline-view-datasource-wrapper%
   (class object%

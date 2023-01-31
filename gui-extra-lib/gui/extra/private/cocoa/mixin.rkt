@@ -15,13 +15,13 @@
 (define-objc-mixin (TextEditingDelegate _Super)
   [wxb]
   [-a _void (controlTextDidBeginEditing: [_id notification])
-      (try-send wxb text-did-begin-editing)]
+    (try-send wxb text-did-begin-editing)]
 
   [-a _void (controlTextDidChange: [_id notification])
-      (try-send wxb text-did-change (tell #:type _NSString self stringValue))]
+    (try-send wxb text-did-change (tell #:type _NSString self stringValue))]
 
   [-a _void (controlTextDidEndEditing: [_id notification])
-      (try-send wxb text-did-end-editing)])
+    (try-send wxb text-did-end-editing)])
 
 (define text-field<%>
   (interface ()

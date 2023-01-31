@@ -15,9 +15,9 @@
   #:mixins (TextEditingDelegate)
   [wxb]
   [-a _void (searchFieldDidStartSearching: [_id sender])
-      (try-send wxb search-did-start)]
+    (try-send wxb search-did-start)]
   [-a _void (searchFieldDidEndSearching: [_id sender])
-      (try-send wxb search-did-end)])
+    (try-send wxb search-did-end)])
 
 (define search-field%
   (class mred:basic-control%
