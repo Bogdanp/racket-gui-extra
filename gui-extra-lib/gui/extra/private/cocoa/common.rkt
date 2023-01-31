@@ -5,8 +5,20 @@
          "ffi.rkt")
 
 (provide
+ with-atomic
+ with-entry-point
  try-send*
  try-send)
+
+(define-syntax-rule (with-atomic body0 body ...)
+  (call-as-atomic
+   (lambda ()
+     body0 body ...)))
+
+(define-syntax-rule (with-entry-point body0 body ...)
+  (entry-point
+   (lambda ()
+     body0 body ...)))
 
 (define-syntax-rule (try-send* who [what e ...] ...)
   (let ([wx (->wx who)])

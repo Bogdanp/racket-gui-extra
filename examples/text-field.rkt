@@ -2,7 +2,8 @@
 
 (require racket/gui/extra)
 
-(define f (new frame% [label "iPad"]))
+(define f
+  (new frame% [label "Text Field"]))
 (new text-field%
      [parent f]
      [init-value "example"]

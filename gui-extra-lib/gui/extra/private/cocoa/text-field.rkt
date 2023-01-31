@@ -1,6 +1,7 @@
 #lang racket/base
 
 (require racket/class
+         "common.rkt"
          "ffi.rkt"
          "mixin.rkt"
          (prefix-in mred: "mred.rkt"))
@@ -20,27 +21,35 @@
           [init-value ""]
           [callback void])
     (init-rest)
-    (public*
-     [get-value
-      (entry-point
-       (lambda ()
-         (send (mred:mred->wx this) get-value)))]
-     [set-value
-      (entry-point
-       (lambda (v)
-         (unless (string? v)
-           (raise-argument-error 'set-value "string?" v))
-         (send (mred:mred->wx this) set-value v)))])
-    (call-as-atomic
-     (lambda ()
-       (super-instantiate
-        [(lambda ()
-           (make-object wx-text-field% this this
-                        (mred:mred->wx-container parent)
-                        init-value callback))
-         (lambda ()
-           (void))
-         #f parent callback #f])))))
+
+    (with-atomic
+      (super-new
+       [mk-wx (λ ()
+                (new wx-text-field%
+                     [mred this]
+                     [proxy this]
+                     [parent (mred:mred->wx-container parent)]
+                     [init-value init-value]
+                     [callback callback]))]
+       [mismatches (λ () null)]
+       [parent parent]
+       [cursor #f]
+       [lbl #f]
+       [cb callback]))
+
+    (define/public (get-value)
+      (with-entry-point
+        (send (mred:mred->wx this) get-value)))
+
+    (define/public (set-value v)
+      (unless (string? v)
+        (raise-argument-error 'set-value "string?" v))
+      (with-entry-point
+        (send (mred:mred->wx this) set-value v)))
+
+    (define/public (select-all)
+      (with-entry-point
+        (send (mred:mred->wx this) select-all)))))
 
 (define ns-text-field%
   (text-field-mixin

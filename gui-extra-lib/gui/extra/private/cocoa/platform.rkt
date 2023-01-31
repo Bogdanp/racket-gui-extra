@@ -1,6 +1,8 @@
 #lang racket/base
 
+;; Must be loaded separately and before everything else.
 (require "init.rkt")
+
 (require (for-syntax racket/base)
 
          "image.rkt"
@@ -15,8 +17,7 @@
   (make-hasheq))
 
 (define-syntax-rule (define-for-platform name ...)
-  (begin
-    (hash-set! platform-map 'name name) ...))
+  (begin (hash-set! platform-map 'name name) ...))
 
 (define-for-platform
   ;; image.rkt

@@ -25,6 +25,11 @@
 
 (define text-field<%>
   (interface ()
+    get-value
+    set-value
+
+    select-all
+
     text-did-begin-editing
     text-did-change
     text-did-end-editing))
@@ -39,6 +44,9 @@
     (define/public (set-value v)
       (set! value v)
       (tellv (get-cocoa) setStringValue: #:type _NSString v))
+
+    (define/public (select-all)
+      (tellv (get-cocoa) selectText: #f))
 
     (define/public (text-did-begin-editing)
       (callback this 'begin))

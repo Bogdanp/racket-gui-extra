@@ -2,7 +2,7 @@
 
 (require racket/gui/extra)
 
-(define f (new frame% [label "iPad"]))
+(define f (new frame% [label "Search Field"]))
 (new search-field%
      [parent f]
      [init-value "example"]
