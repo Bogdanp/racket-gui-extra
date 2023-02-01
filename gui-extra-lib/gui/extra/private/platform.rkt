@@ -29,4 +29,6 @@
 
   search-field%
 
+  status-bar-menu%
+
   text-field%)

@@ -8,6 +8,7 @@
          "image.rkt"
          "outline-view.rkt"
          "search-field.rkt"
+         "status-bar.rkt"
          "text-field.rkt")
 
 (provide
@@ -31,6 +32,9 @@
 
   ;; search-field.rkt
   search-field%
+
+  ;; status-bar.rkt
+  status-bar-menu%
 
   ;; text-field.rkt
   text-field%
