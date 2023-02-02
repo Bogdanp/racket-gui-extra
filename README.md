@@ -6,10 +6,10 @@ server or documented.
 
 ## Installation
 
-1. Clone the repo
-2. raco pkg install gui-extra-lib/ 
+1. Clone the repo.
+2. `raco pkg install gui-extra-lib/`
 
-Note the trailing backslash in 2.
+Note the trailing slash in 2.
 
 ## License
 
